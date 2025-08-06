@@ -1,0 +1,13 @@
+{
+  "activeUsers": [for (.users) if (.active) {
+    "userId": .id,
+    "fullName": .name,
+    "contactEmail": .email,
+    "location": .address.city + ", " + .address.zipCode
+  }],
+  "summary": {
+    "totalUsers": .metadata.total,
+    "activeCount": size([for (.users) if (.active) .]),
+    "processedAt": .metadata.timestamp
+  }
+}

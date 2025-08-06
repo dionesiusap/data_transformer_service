@@ -1,0 +1,32 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "age": 30,
+      "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "zipCode": "10001"
+      },
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com", 
+      "age": 25,
+      "address": {
+        "street": "456 Oak Ave",
+        "city": "Los Angeles",
+        "zipCode": "90210"
+      },
+      "active": false
+    }
+  ],
+  "metadata": {
+    "total": 2,
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
+}
