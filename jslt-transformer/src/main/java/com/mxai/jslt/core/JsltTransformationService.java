@@ -10,6 +10,7 @@ import com.schibsted.spt.data.jslt.Expression;
 import com.schibsted.spt.data.jslt.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,17 +20,13 @@ import java.nio.file.Path;
 /**
  * Core service for JSLT transformation operations.
  * 
- * This service provides the main business logic for:
- * - Loading and parsing JSON input files
- * - Compiling JSLT query expressions
- * - Executing transformations with performance monitoring
- * - Handling errors and providing detailed diagnostics
- * 
- * The service is stateless and thread-safe, supporting concurrent operations.
+ * Provides methods to transform JSON data using JSLT queries,
+ * with support for file-based and string-based input/output.
  * 
  * @author MXAI Development Team
  * @since 1.0.0
  */
+@Service
 public class JsltTransformationService {
 
     private static final Logger log = LoggerFactory.getLogger(JsltTransformationService.class);
