@@ -47,7 +47,8 @@ class JsltTransformationControllerUnitTest {
         // Arrange
         String inputJson = "{\"name\": \"John\", \"age\": 30}";
         String jsltQuery = "{\"fullName\": .name, \"years\": .age}";
-        TransformationRequest request = new TransformationRequest(inputJson, jsltQuery, false);
+        JsonNode jsonData = objectMapper.readTree(inputJson);
+        TransformationRequest request = new TransformationRequest(jsonData, jsltQuery, false, false);
         
         JsonNode outputNode = objectMapper.readTree("{\"fullName\": \"John\", \"years\": 30}");
         TransformationResult mockResult = new TransformationResult(outputNode, true, 15L, null);
@@ -74,7 +75,8 @@ class JsltTransformationControllerUnitTest {
         // Arrange
         String inputJson = "{\"name\": \"John\", \"age\": 30}";
         String jsltQuery = "{\"fullName\": .name, \"years\": .age}";
-        TransformationRequest request = new TransformationRequest(inputJson, jsltQuery, true);
+        JsonNode jsonData = objectMapper.readTree(inputJson);
+        TransformationRequest request = new TransformationRequest(jsonData, jsltQuery, true, false);
         
         JsonNode outputNode = objectMapper.readTree("{\"fullName\": \"John\", \"years\": 30}");
         TransformationResult mockResult = new TransformationResult(outputNode, true, 20L, null);
@@ -101,7 +103,8 @@ class JsltTransformationControllerUnitTest {
         // Arrange
         String inputJson = "{\"name\": \"John\"}";
         String jsltQuery = "invalid query";
-        TransformationRequest request = new TransformationRequest(inputJson, jsltQuery, false);
+        JsonNode jsonData = objectMapper.readTree(inputJson);
+        TransformationRequest request = new TransformationRequest(jsonData, jsltQuery, false, false);
         
         String errorMessage = "JSLT compilation failed";
         TransformationResult mockResult = new TransformationResult(null, false, 5L, errorMessage);

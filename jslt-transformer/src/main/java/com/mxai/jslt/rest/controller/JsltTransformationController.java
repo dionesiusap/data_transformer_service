@@ -1,5 +1,6 @@
 package com.mxai.jslt.rest.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mxai.jslt.core.JsltTransformationService;
 import com.mxai.jslt.model.TransformationResult;
 import com.mxai.jslt.rest.model.HealthResponse;
@@ -10,7 +11,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,20 +32,24 @@ import java.util.UUID;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class JsltTransformationController {
 
-    private static final Logger logger = LoggerFactory.getLogger(JsltTransformationController.class);
+    private static final Logger log = LoggerFactory.getLogger(JsltTransformationController.class);
     private static final String SERVICE_NAME = "JSLT Transformation Service";
     private static final String SERVICE_VERSION = "1.0.0";
+    private static final int MAX_JSON_SIZE = 100 * 1024 * 1024; // 100MB limit
 
     private final JsltTransformationService transformationService;
+    private final ObjectMapper objectMapper;
 
     /**
      * Constructor with dependency injection.
      *
      * @param transformationService the JSLT transformation service
+     * @param objectMapper the JSON object mapper
      */
     @Autowired
-    public JsltTransformationController(JsltTransformationService transformationService) {
+    public JsltTransformationController(JsltTransformationService transformationService, ObjectMapper objectMapper) {
         this.transformationService = transformationService;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -57,49 +62,60 @@ public class JsltTransformationController {
     public ResponseEntity<TransformationResponse> transform(@Valid @RequestBody TransformationRequest request) {
         String requestId = UUID.randomUUID().toString();
         
-        logger.info("Processing transformation request: requestId={}, jsonDataLength={}, queryLength={}, prettyPrint={}", 
-            requestId, request.jsonData().length(), request.jsltQuery().length(), request.prettyPrint());
-
+        log.info("Processing transformation request: {} with query length: {}", 
+                requestId, request.jsltQuery().length());
+        
         try {
-            // Perform transformation using core service
-            TransformationResult result = transformationService.transformFromStrings(
-                request.jsonData(), 
-                request.jsltQuery()
-            );
-
-            if (result.success()) {
-                // Format output based on prettyPrint preference
-                String formattedResult = request.prettyPrint() 
-                    ? transformationService.formatJsonAsString(result.transformedJson(), true)
-                    : result.transformedJson().toString();
-
-                TransformationResponse response = TransformationResponse.success(
-                    formattedResult, 
-                    result.processingTimeMs(), 
-                    requestId
-                );
-
-                logger.info("Transformation completed successfully: requestId={}, processingTime={}ms", 
-                    requestId, result.processingTimeMs());
-
-                return ResponseEntity.ok(response);
-
+            // Convert JsonNode to string for processing - handle both object and string inputs
+            String jsonDataString;
+            if (request.jsonData().isTextual()) {
+                // Input is already a JSON string, use it directly
+                jsonDataString = request.jsonData().asText();
             } else {
-                TransformationResponse response = TransformationResponse.error(
-                    result.errorMessage(), 
-                    requestId
-                );
-
-                logger.warn("Transformation failed: requestId={}, error={}", requestId, result.errorMessage());
-                return ResponseEntity.badRequest().body(response);
+                // Input is a JSON object, serialize it to string
+                jsonDataString = objectMapper.writeValueAsString(request.jsonData());
             }
-
+            
+            // Validate input JSON length for large file support
+            if (jsonDataString.length() > MAX_JSON_SIZE) {
+                String errorMsg = String.format("JSON data size (%d bytes) exceeds maximum allowed size (%d bytes)", 
+                    jsonDataString.length(), MAX_JSON_SIZE);
+                log.warn("Request {} rejected: {}", requestId, errorMsg);
+                return ResponseEntity.ok(
+                    TransformationResponse.error(errorMsg, requestId));
+            }
+            
+            // Perform transformation
+            TransformationResult result = transformationService.transformFromStrings(
+                jsonDataString, request.jsltQuery());
+            
+            if (result.success()) {
+                Object formattedResult;
+                if (request.returnAsString()) {
+                    // Return as JSON string
+                    formattedResult = transformationService.formatJsonAsString(
+                        result.transformedJson(), request.prettyPrint());
+                } else {
+                    // Return as JSON object
+                    formattedResult = result.transformedJson();
+                }
+                
+                log.info("Transformation successful for request: {} in {}ms", 
+                        requestId, result.processingTimeMs());
+                
+                return ResponseEntity.ok(
+                    TransformationResponse.success(formattedResult, result.processingTimeMs(), requestId));
+            } else {
+                log.warn("Transformation failed for request: {} - {}", requestId, result.errorMessage());
+                return ResponseEntity.ok(
+                    TransformationResponse.error(result.errorMessage(), requestId));
+            }
+            
         } catch (Exception e) {
-            String errorMessage = "Unexpected error during transformation: " + e.getMessage();
-            logger.error("Unexpected error in transformation: requestId={}", requestId, e);
-
-            TransformationResponse response = TransformationResponse.error(errorMessage, requestId);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            String errorMsg = "Unexpected error during transformation: " + e.getMessage();
+            log.error("Unexpected error for request: {}", requestId, e);
+            return ResponseEntity.ok(
+                TransformationResponse.error(errorMsg, requestId));
         }
     }
 
@@ -110,7 +126,7 @@ public class JsltTransformationController {
      */
     @GetMapping("/health")
     public ResponseEntity<HealthResponse> health() {
-        logger.debug("Health check requested");
+        log.debug("Health check requested");
         
         HealthResponse response = new HealthResponse(
             "UP", 
@@ -127,7 +143,7 @@ public class JsltTransformationController {
      */
     @GetMapping("/version")
     public ResponseEntity<VersionResponse> version() {
-        logger.debug("Version information requested");
+        log.debug("Version information requested");
         
         VersionResponse response = new VersionResponse(
             SERVICE_VERSION, 

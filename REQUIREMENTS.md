@@ -47,33 +47,41 @@ jslt-transform --input <input.json> --query <query.jslt> [--output <output.json>
 **Request:**
 ```json
 {
-  "data": {...},           // Input JSON data to transform
-  "query": "string",       // JSLT transformation query
-  "options": {             // Optional transformation options
-    "strict": true,        // Enable strict mode (default: false)
-    "prettyPrint": true    // Format output JSON (default: false)
-  }
+  "jsonData": {...} | "string",  // Input JSON data (object or JSON string)
+  "jsltQuery": "string",         // JSLT transformation query
+  "prettyPrint": false,           // Format output JSON (default: false)
+  "returnAsString": false         // Return result as string vs object (default: false)
 }
 ```
 
-**Response:**
+**Key Features:**
+- **Flexible Input**: `jsonData` accepts both JSON objects and JSON strings
+- **Flexible Output**: `returnAsString=false` returns JSON object, `returnAsString=true` returns formatted JSON string
+- **Consistent Responses**: All responses use HTTP 200 with structured success/error format
+- **Request Tracking**: Every request gets a unique `requestId` for debugging and logging
+- **Input Validation**: Maximum 100MB JSON input size with clear error messages
+
+**Success Response:**
 ```json
 {
-  "result": {...},         // Transformed JSON result
-  "executionTime": 123,    // Execution time in milliseconds
-  "status": "success"      // Status: success, error, warning
+  "success": true,
+  "result": {...},                    // Transformed JSON result (object or string based on returnAsString)
+  "errorMessage": null,               // Always null on success
+  "processingTimeMs": 123,            // Processing time in milliseconds
+  "requestId": "uuid-string",        // Unique request identifier for tracking
+  "timestamp": "2025-08-06T16:01:43.554792Z"  // ISO 8601 timestamp
 }
 ```
 
 **Error Response:**
 ```json
 {
-  "error": {
-    "code": "JSLT_SYNTAX_ERROR",
-    "message": "Invalid JSLT syntax at line 5",
-    "details": "..."
-  },
-  "status": "error"
+  "success": false,
+  "result": null,                     // Always null on error
+  "errorMessage": "JSLT transformation failed: Parse error...",  // Detailed error message
+  "processingTimeMs": null,           // Null when transformation fails
+  "requestId": "uuid-string",        // Unique request identifier for tracking
+  "timestamp": "2025-08-06T16:01:55.478963Z"  // ISO 8601 timestamp
 }
 ```
 
@@ -245,16 +253,17 @@ Users will configure the MCP server in Claude Desktop's config file:
 - [x] Unit tests for CLI functionality
 - [x] Package as executable JAR
 
-### Phase 2: REST API Development (Weeks 3-4)
-- [ ] Add Spring Boot framework to existing project
-- [ ] Database setup (PostgreSQL) with API key storage
-- [ ] Implement REST endpoints using existing transformation logic
-- [ ] Implement comprehensive error responses
-- [ ] Add API documentation with Swagger/OpenAPI
-- [ ] Implement rate limiting and security features
-- [ ] Add health check and metrics endpoints
-- [ ] Performance optimization and testing
-- [ ] Integration testing suite
+### Phase 2: REST API Development (Weeks 3-4) ✅ COMPLETED
+- [x] Spring Boot REST API implementation
+- [x] Transform endpoint with flexible input/output formats
+- [x] Consistent response structure with error handling
+- [x] Request validation and size limits
+- [x] Health check and version endpoints
+- [x] OpenAPI documentation
+- [x] Unit tests and manual validation
+- [ ] Database setup (PostgreSQL) with API key storage - **Deferred to Phase 4**
+- [ ] Rate limiting and security features - **Deferred to Phase 4**
+- [ ] Performance optimization and load testing - **Deferred to Phase 4**
 
 ### Phase 3: MCP Integration (Weeks 5-6)
 - [ ] Research MCP protocol specification
@@ -282,16 +291,22 @@ Users will configure the MCP server in Claude Desktop's config file:
 ## Success Criteria
 
 ### Functional
-- ✅ Successfully transform JSON using JSLT queries
-- ✅ Handle malformed input gracefully with clear error messages
-- ✅ Provide both REST API and MCP interfaces
-- ✅ Support concurrent users without performance degradation
+- ✅ **Successfully transform JSON using JSLT queries** - CLI and REST API implemented
+- ✅ **Handle malformed input gracefully with clear error messages** - Comprehensive error handling
+- ✅ **Flexible input/output formats** - Support JSON objects and strings with configurable output
+- ✅ **Consistent API responses** - Structured responses with explicit null fields
+- ✅ **Request tracking and logging** - Unique request IDs and timestamps
+- 🔄 **Provide both REST API and MCP interfaces** - REST API complete, MCP in progress
+- 🔄 **Support concurrent users without performance degradation** - To be validated in Phase 4
 
 ### Technical
-- ✅ 99.9% uptime in production
-- ✅ < 500ms response time for 95% of requests
-- ✅ Support for JSON documents up to 10MB
-- ✅ Comprehensive test coverage (>90%)
+- ✅ **CLI Interface** - Complete with comprehensive testing
+- ✅ **REST API** - Complete with flexible input/output and error handling
+- ✅ **Input validation** - Support for JSON documents up to 100MB
+- ✅ **Comprehensive test coverage** - Unit tests for all components
+- ✅ **OpenAPI documentation** - Complete API specification
+- 🔄 **99.9% uptime in production** - To be validated in production deployment
+- 🔄 **< 500ms response time for 95% of requests** - To be validated with load testing
 
 ### Operational
 - ✅ Easy deployment and scaling

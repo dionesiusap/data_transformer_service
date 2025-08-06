@@ -29,7 +29,7 @@ spring:
   
   # Jackson configuration
   jackson:
-    default-property-inclusion: non_null
+    default-property-inclusion: always
     serialization:
       write-dates-as-timestamps: false
       indent-output: false
