@@ -1,5 +1,6 @@
 package com.mxai.jslt.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mxai.jslt.exception.FileProcessingException;
@@ -49,6 +50,41 @@ public class JsltTransformationService {
      */
     public JsltTransformationService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+    }
+
+    /**
+     * Transform JSON data using JSLT query from strings.
+     *
+     * @param jsonData the input JSON data as a string
+     * @param jsltQuery the JSLT transformation query as a string
+     * @return transformation result with success status and timing
+     */
+    public TransformationResult transformFromStrings(String jsonData, String jsltQuery) {
+        log.info("Starting transformation from strings: jsonData={}chars, query={}chars", 
+            jsonData.length(), jsltQuery.length());
+        
+        long startTime = System.currentTimeMillis();
+        
+        try {
+            // Parse input JSON
+            JsonNode inputJson = objectMapper.readTree(jsonData);
+            log.debug("Successfully parsed input JSON with {} nodes", 
+                inputJson.isObject() ? inputJson.size() : "unknown");
+            
+            // Perform transformation
+            return transformJson(inputJson, jsltQuery, startTime);
+            
+        } catch (JsonProcessingException e) {
+            long processingTime = System.currentTimeMillis() - startTime;
+            String errorMessage = "Failed to parse JSON data: " + e.getMessage();
+            log.error("JSON parsing failed after {}ms: {}", processingTime, errorMessage);
+            return TransformationResult.failure(errorMessage, processingTime);
+            
+        } catch (Exception e) {
+            long processingTime = System.currentTimeMillis() - startTime;
+            log.error("Transformation failed after {}ms", processingTime, e);
+            return TransformationResult.failure(e.getMessage(), processingTime);
+        }
     }
 
     /**
