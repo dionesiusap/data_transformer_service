@@ -6,6 +6,7 @@
 
 # Log files
 *.log
+jslt-transformer/logs/
 
 # Maven
 target/
