@@ -24,6 +24,7 @@
         <!-- Dependency Versions -->
         <jslt.version>0.1.14</jslt.version>
         <spring.boot.version>3.2.1</spring.boot.version>
+
         <picocli.version>4.7.5</picocli.version>
         <jackson.version>2.16.1</jackson.version>
         <logback.version>1.4.14</logback.version>
@@ -33,6 +34,8 @@
         <h2.version>2.2.224</h2.version>
         <postgresql.version>42.7.1</postgresql.version>
     </properties>
+    
+
     
     <dependencies>
         <!-- Core JSLT Library -->
@@ -74,6 +77,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
             <version>${spring.boot.version}</version>
+        </dependency>
+        
+        <!-- JSON-RPC for MCP Implementation -->
+        <dependency>
+            <groupId>com.github.briandilley.jsonrpc4j</groupId>
+            <artifactId>jsonrpc4j</artifactId>
+            <version>1.6</version>
         </dependency>
         
         <!-- JSON Processing (included with Spring Boot Web, but explicit for clarity) -->

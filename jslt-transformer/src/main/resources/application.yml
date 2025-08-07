@@ -62,3 +62,17 @@ jslt:
     version: 1.0.0
     max-file-size: 100MB
     timeout-seconds: 30
+
+# MCP (Model Context Protocol) server configuration
+mcp:
+  server:
+    enabled: true
+    name: jslt-transformer
+    version: 1.0.0
+    description: "JSLT JSON Transformation Service - Transform JSON data using JSLT queries"
+    stdio:
+      enabled: true
+    http:
+      enabled: false
+      port: 8081
+      path: /mcp
