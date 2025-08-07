@@ -112,31 +112,26 @@ Communication uses JSON-RPC protocol over stdio or HTTP transport.
   "inputSchema": {
     "type": "object",
     "properties": {
-      "input_data": {
-        "type": "object",
-        "description": "JSON data to transform"
+      "jsonData": {
+        "type": ["object", "string"],
+        "description": "JSON data to transform (object or JSON string)"
       },
-      "jslt_query": {
+      "jsltQuery": {
         "type": "string",
         "description": "JSLT transformation query"
       },
-      "options": {
-        "type": "object",
-        "properties": {
-          "strict_mode": {
-            "type": "boolean",
-            "description": "Enable strict validation",
-            "default": false
-          },
-          "pretty_print": {
-            "type": "boolean",
-            "description": "Format output JSON",
-            "default": false
-          }
-        }
+      "prettyPrint": {
+        "type": "boolean",
+        "description": "Format output with pretty printing",
+        "default": false
+      },
+      "returnAsString": {
+        "type": "boolean",
+        "description": "Return result as JSON string instead of object",
+        "default": false
       }
     },
-    "required": ["input_data", "jslt_query"]
+    "required": ["jsonData", "jsltQuery"]
   }
 }
 ```
@@ -266,11 +261,15 @@ Users will configure the MCP server in Claude Desktop's config file:
 - [ ] Performance optimization and load testing - **Deferred to Phase 4**
 
 ### Phase 3: MCP Integration (Weeks 5-6)
-- [ ] Research MCP protocol specification
-- [ ] Implement MCP server capabilities
-- [ ] Create MCP tool wrapper for JSLT transformation
-- [ ] Test integration with Claude Desktop and similar tools
-- [ ] Document MCP setup and usage examples
+- [x] Research MCP protocol specification and Java SDK options
+- [x] Document MCP research findings and implementation strategy
+- [ ] Add Spring AI MCP dependencies and initial server configuration
+- [ ] Implement JSLT transformation tool with MCP annotations
+- [ ] Configure stdio transport for Claude Desktop integration
+- [ ] Configure HTTP/SSE transport for web-based AI clients
+- [ ] Test tool discovery and execution with MCP Inspector
+- [ ] Validate Claude Desktop integration and user approval workflow
+- [ ] Create comprehensive MCP setup and usage documentation
 
 ### Phase 4: Production Readiness (Weeks 7-8)
 - [ ] Docker containerization
