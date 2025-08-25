@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "jslt-transformer": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/Users/dionesius.perkasa/Playground/data_transformer/jslt-transformer/target/jslt-transformer-1.0-SNAPSHOT-mcp.jar",
+        "--spring.profiles.active=mcp"
+      ],
+      "env": {
+        "JAVA_HOME": "/opt/homebrew/opt/openjdk@17"
+      }
+    }
+  }
+}
