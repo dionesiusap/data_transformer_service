@@ -1,0 +1,53 @@
+# Spring AI MCP Server Configuration for JSLT Transformer
+# This configuration sets up STDIO transport for Claude Desktop integration
+
+spring:
+  application:
+    name: jslt-mcp-server
+  main:
+    web-application-type: none
+    banner-mode: off
+  
+  # MCP Server Configuration
+  ai:
+    mcp:
+      server:
+        name: jslt-transformer-mcp-server
+        version: 1.0.0
+        type: SYNC
+        instructions: |
+          This server provides JSLT (JSON Transformation Language) capabilities for transforming JSON data.
+          Use the jslt_transform tool to transform JSON data using JSLT queries.
+          
+          JSLT supports:
+          - Field mapping and renaming
+          - Data filtering and conditional logic
+          - Array transformations and aggregations
+          - Complex nested object restructuring
+          - Mathematical operations and string manipulations
+          
+          Example JSLT queries:
+          - Simple mapping: {"name": .user.fullName, "email": .user.contact.email}
+          - Array transformation: [.items[] | {"id": .id, "total": .price * .quantity}]
+          - Conditional logic: if (.status == "active") then .data else null
+        
+        # STDIO transport configuration (default for Claude Desktop)
+        transport:
+          type: stdio
+        
+        # Server capabilities
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+
+# Logging configuration for MCP (file-only, no console output)
+logging:
+  config: classpath:logback-mcp.xml
+  pattern:
+    console: ""  # Critical: Disable console logging patterns for STDIO transport
+  level:
+    com.mxai.jslt: DEBUG
+    org.springframework.ai.mcp: DEBUG
+    root: WARN

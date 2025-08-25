@@ -24,6 +24,7 @@
         <!-- Dependency Versions -->
         <jslt.version>0.1.14</jslt.version>
         <spring.boot.version>3.2.1</spring.boot.version>
+        <spring.ai.version>1.0.0-M6</spring.ai.version>
 
         <picocli.version>4.7.5</picocli.version>
         <jackson.version>2.16.1</jackson.version>
@@ -79,11 +80,11 @@
             <version>${spring.boot.version}</version>
         </dependency>
         
-        <!-- JSON-RPC for MCP Implementation -->
+        <!-- Spring AI MCP Server Dependencies (STDIO for Claude Desktop) -->
         <dependency>
-            <groupId>com.github.briandilley.jsonrpc4j</groupId>
-            <artifactId>jsonrpc4j</artifactId>
-            <version>1.6</version>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-mcp-server-spring-boot-starter</artifactId>
+            <version>${spring.ai.version}</version>
         </dependency>
         
         <!-- JSON Processing (included with Spring Boot Web, but explicit for clarity) -->
@@ -218,6 +219,42 @@
                                     <mainClass>com.mxai.jslt.cli.JsltTransformerCli</mainClass>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+
+                    <!-- MCP Server Executable JAR -->
+                    <execution>
+                        <id>shade-mcp</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>mcp</shadedClassifierName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.mxai.jslt.mcp.SpringMcpServerApplication</mainClass>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.factories</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</resource>
+                                </transformer>
                             </transformers>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <filters>
